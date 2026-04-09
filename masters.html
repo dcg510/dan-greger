@@ -1,0 +1,1554 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>The Masters 2026 — Live Scoring</title>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;0,900;1,400&family=Inter:wght@300;400;500;600;700&family=Roboto+Mono:wght@400;500;600&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      --green: #006747;
+      --green-dark: #00472f;
+      --green-deep: #003d28;
+      --gold: #c9a96e;
+      --gold-bright: #e8d49a;
+      --bg: #070e07;
+      --bg-card: #0c180c;
+      --bg-lb: #090f09;
+      --text: #e4e8e0;
+      --text-sub: #8a9e82;
+      --text-muted: #4a5e44;
+      --red: #e85555;
+      --red-light: #ff8a8a;
+      --border: rgba(0,103,71,0.28);
+      --border-gold: rgba(201,169,110,0.38);
+      --glow: rgba(0,103,71,0.35);
+    }
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: 'Inter', sans-serif;
+      min-height: 100vh;
+      overflow-x: hidden;
+    }
+
+    body::before {
+      content: '';
+      position: fixed;
+      inset: 0;
+      background:
+        radial-gradient(ellipse at 15% 40%, rgba(0,103,71,0.07) 0%, transparent 55%),
+        radial-gradient(ellipse at 85% 15%, rgba(201,169,110,0.04) 0%, transparent 50%),
+        radial-gradient(ellipse at 50% 90%, rgba(0,103,71,0.05) 0%, transparent 55%);
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    /* ───── HEADER ───── */
+    .header {
+      position: sticky;
+      top: 0;
+      z-index: 200;
+      background: linear-gradient(180deg, #030803 0%, #060e06 100%);
+      border-bottom: 1px solid var(--border-gold);
+      box-shadow: 0 4px 40px rgba(0,0,0,0.7);
+    }
+
+    .header-inner {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 10px 24px;
+      max-width: 1900px;
+      margin: 0 auto;
+    }
+
+    .logo-wrap {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+    }
+
+    .logo-mark {
+      width: 48px;
+      height: 48px;
+      background: var(--green);
+      border-radius: 6px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 0 24px rgba(0,103,71,0.6), 0 0 60px rgba(0,103,71,0.2);
+      flex-shrink: 0;
+    }
+
+    .logo-mark svg { width: 32px; height: 32px; }
+
+    .logo-text-wrap { display: flex; flex-direction: column; }
+
+    .logo-main {
+      font-family: 'Playfair Display', serif;
+      font-size: 20px;
+      font-weight: 900;
+      color: var(--gold);
+      letter-spacing: 4px;
+      text-transform: uppercase;
+      line-height: 1;
+    }
+
+    .logo-sub {
+      font-size: 9px;
+      color: var(--text-muted);
+      letter-spacing: 5px;
+      text-transform: uppercase;
+      margin-top: 3px;
+    }
+
+    .header-center {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 3px;
+    }
+
+    .round-badge {
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 3px;
+      text-transform: uppercase;
+      color: var(--text);
+    }
+
+    .round-detail {
+      font-size: 10px;
+      color: var(--text-sub);
+      letter-spacing: 1.5px;
+    }
+
+    .header-right {
+      display: flex;
+      align-items: center;
+      gap: 20px;
+    }
+
+    .live-badge {
+      display: flex;
+      align-items: center;
+      gap: 7px;
+      background: rgba(220,50,50,0.12);
+      border: 1px solid rgba(220,50,50,0.45);
+      border-radius: 20px;
+      padding: 5px 13px;
+    }
+
+    .live-dot {
+      width: 7px;
+      height: 7px;
+      background: #ff4444;
+      border-radius: 50%;
+      animation: pulseDot 1.4s ease-in-out infinite;
+    }
+
+    @keyframes pulseDot {
+      0%,100% { opacity:1; box-shadow:0 0 0 0 rgba(255,68,68,0.5); }
+      50% { opacity:.6; box-shadow:0 0 0 5px rgba(255,68,68,0); }
+    }
+
+    .live-label {
+      font-size: 10px;
+      font-weight: 800;
+      color: #ff6b6b;
+      letter-spacing: 2px;
+    }
+
+    .clock-display {
+      font-family: 'Roboto Mono', monospace;
+      font-size: 13px;
+      color: var(--gold);
+      letter-spacing: 2px;
+      min-width: 80px;
+      text-align: right;
+    }
+
+    .weather {
+      font-size: 11px;
+      color: var(--text-muted);
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    /* ───── TICKER ───── */
+    .ticker {
+      background: var(--green);
+      padding: 5px 0;
+      overflow: hidden;
+      border-bottom: 1px solid var(--green-dark);
+      position: relative;
+      z-index: 150;
+    }
+
+    .ticker-track {
+      display: flex;
+      gap: 0;
+      animation: tickerScroll 50s linear infinite;
+      white-space: nowrap;
+    }
+
+    @keyframes tickerScroll {
+      0% { transform: translateX(0); }
+      100% { transform: translateX(-50%); }
+    }
+
+    .ticker-set {
+      display: flex;
+      gap: 40px;
+      padding-right: 40px;
+    }
+
+    .t-item {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 11px;
+      font-weight: 500;
+      color: rgba(255,255,255,0.9);
+    }
+
+    .t-name { font-weight: 600; }
+    .t-hole { color: rgba(255,255,255,0.6); font-size: 10px; }
+    .t-score { font-family: 'Roboto Mono',monospace; font-weight: 700; }
+    .t-score.eagle { color: #ffd700; }
+    .t-score.birdie { color: #ffcccc; }
+    .t-score.bogey { color: rgba(255,255,255,0.5); }
+    .t-sep { color: rgba(255,255,255,0.25); }
+
+    /* ───── LAYOUT ───── */
+    .layout {
+      display: grid;
+      grid-template-columns: 360px 1fr;
+      height: calc(100vh - 90px);
+      max-width: 1900px;
+      margin: 0 auto;
+      position: relative;
+      z-index: 1;
+    }
+
+    /* ───── LEADERBOARD ───── */
+    .lb-panel {
+      border-right: 1px solid var(--border);
+      overflow-y: auto;
+      background: var(--bg-lb);
+      scrollbar-width: thin;
+      scrollbar-color: var(--green) transparent;
+    }
+
+    .lb-panel::-webkit-scrollbar { width: 3px; }
+    .lb-panel::-webkit-scrollbar-thumb { background: var(--green); border-radius: 2px; }
+
+    .panel-head {
+      padding: 14px 18px 10px;
+      border-bottom: 1px solid var(--border);
+      position: sticky;
+      top: 0;
+      background: var(--bg-lb);
+      z-index: 10;
+    }
+
+    .panel-title {
+      font-family: 'Playfair Display', serif;
+      font-size: 14px;
+      font-weight: 700;
+      color: var(--gold);
+      letter-spacing: 3px;
+      text-transform: uppercase;
+    }
+
+    .panel-sub {
+      font-size: 9px;
+      color: var(--text-muted);
+      letter-spacing: 3px;
+      text-transform: uppercase;
+      margin-top: 2px;
+    }
+
+    .lb-cols {
+      display: grid;
+      grid-template-columns: 32px 1fr 58px 52px 52px;
+      padding: 6px 18px;
+      font-size: 8.5px;
+      color: var(--text-muted);
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      border-bottom: 1px solid rgba(0,103,71,0.12);
+    }
+
+    .lb-cols span:not(:first-child) { text-align: right; }
+
+    .lb-row {
+      display: grid;
+      grid-template-columns: 32px 1fr 58px 52px 52px;
+      padding: 9px 18px;
+      border-bottom: 1px solid rgba(0,103,71,0.08);
+      align-items: center;
+      cursor: pointer;
+      transition: background 0.2s;
+      position: relative;
+    }
+
+    .lb-row:hover { background: rgba(0,103,71,0.08); }
+
+    .lb-row.is-leader {
+      background: rgba(201,169,110,0.04);
+      border-left: 2px solid var(--gold);
+    }
+
+    .lb-row.is-selected { background: rgba(0,103,71,0.12); }
+
+    .lb-pos {
+      font-family: 'Roboto Mono', monospace;
+      font-size: 10px;
+      color: var(--text-muted);
+      font-weight: 500;
+    }
+    .lb-pos.p1 { color: var(--gold); font-size: 13px; font-weight: 700; }
+
+    .lb-info { display: flex; flex-direction: column; }
+
+    .lb-name {
+      font-size: 12.5px;
+      font-weight: 600;
+      color: var(--text);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .lb-meta {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      margin-top: 1px;
+    }
+
+    .lb-country { font-size: 9px; color: var(--text-muted); }
+
+    .lb-thru {
+      font-size: 9px;
+      color: var(--text-sub);
+      font-family: 'Roboto Mono', monospace;
+    }
+    .lb-thru.active { color: var(--gold); }
+
+    .lb-total {
+      font-family: 'Roboto Mono', monospace;
+      font-size: 14px;
+      font-weight: 700;
+      text-align: right;
+    }
+    .lb-total.under { color: var(--red); }
+    .lb-total.even  { color: var(--text); }
+    .lb-total.over  { color: var(--text-sub); }
+
+    .lb-today {
+      font-family: 'Roboto Mono', monospace;
+      font-size: 11px;
+      text-align: right;
+      color: var(--text-muted);
+    }
+    .lb-today.under { color: var(--red-light); }
+    .lb-today.even  { color: var(--text-sub); }
+
+    .lb-r1 {
+      font-family: 'Roboto Mono', monospace;
+      font-size: 10px;
+      color: var(--text-muted);
+      text-align: right;
+    }
+
+    .move-badge {
+      position: absolute;
+      right: 6px;
+      top: 50%;
+      transform: translateY(-50%);
+      font-size: 8px;
+      font-weight: 700;
+      letter-spacing: 0.5px;
+    }
+    .move-badge.up   { color: #55ee55; }
+    .move-badge.down { color: #ee5555; }
+
+    .cut-divider {
+      padding: 6px 18px;
+      background: rgba(201,169,110,0.06);
+      border-top: 1px dashed rgba(201,169,110,0.3);
+      border-bottom: 1px dashed rgba(201,169,110,0.3);
+      font-size: 9px;
+      color: var(--gold);
+      letter-spacing: 2.5px;
+      text-transform: uppercase;
+      font-weight: 600;
+    }
+
+    /* ───── COURSE PANEL ───── */
+    .course-panel {
+      overflow-y: auto;
+      padding: 18px 20px 80px;
+      scrollbar-width: thin;
+      scrollbar-color: var(--green) transparent;
+    }
+
+    .course-panel::-webkit-scrollbar { width: 3px; }
+    .course-panel::-webkit-scrollbar-thumb { background: var(--green); border-radius: 2px; }
+
+    .course-top {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 16px;
+    }
+
+    .course-heading {
+      font-family: 'Playfair Display', serif;
+      font-size: 15px;
+      color: var(--gold);
+      letter-spacing: 3px;
+      text-transform: uppercase;
+    }
+
+    .course-kpis {
+      display: flex;
+      gap: 20px;
+    }
+
+    .kpi {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 1px;
+    }
+
+    .kpi-val {
+      font-family: 'Roboto Mono', monospace;
+      font-size: 18px;
+      font-weight: 700;
+      color: var(--gold);
+      line-height: 1;
+    }
+
+    .kpi-lbl {
+      font-size: 8px;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      color: var(--text-muted);
+    }
+
+    .nine-header {
+      font-family: 'Playfair Display', serif;
+      font-size: 11px;
+      color: var(--gold);
+      letter-spacing: 4px;
+      text-transform: uppercase;
+      margin-bottom: 8px;
+      padding-bottom: 5px;
+      border-bottom: 1px solid rgba(201,169,110,0.2);
+      opacity: 0.75;
+    }
+
+    .holes-block { margin-bottom: 20px; }
+
+    .holes-grid {
+      display: grid;
+      grid-template-columns: repeat(9, 1fr);
+      gap: 7px;
+    }
+
+    /* ───── HOLE CARD ───── */
+    .hole-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 9px 7px 7px;
+      cursor: pointer;
+      transition: all 0.22s ease;
+      position: relative;
+      overflow: hidden;
+      min-height: 148px;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .hole-card::after {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(135deg, rgba(0,103,71,0.12) 0%, transparent 65%);
+      opacity: 0;
+      transition: opacity 0.22s;
+    }
+
+    .hole-card:hover {
+      border-color: var(--gold);
+      transform: translateY(-2px);
+      box-shadow: 0 8px 28px rgba(0,0,0,0.45), 0 0 18px rgba(201,169,110,0.12);
+    }
+    .hole-card:hover::after { opacity: 1; }
+
+    .hole-card.active-card {
+      border-color: var(--gold);
+      box-shadow: 0 0 20px rgba(201,169,110,0.2);
+    }
+
+    .hole-card.has-players { border-color: rgba(0,103,71,0.55); }
+
+    .hole-card.amen {
+      border-color: rgba(201,169,110,0.35);
+      box-shadow: 0 0 12px rgba(201,169,110,0.08);
+    }
+
+    .hole-num {
+      font-family: 'Playfair Display', serif;
+      font-size: 24px;
+      font-weight: 900;
+      color: var(--green);
+      line-height: 1;
+      opacity: 0.55;
+    }
+
+    .hole-name {
+      font-size: 8px;
+      color: var(--gold);
+      letter-spacing: 0.4px;
+      margin-top: 1px;
+      font-style: italic;
+      line-height: 1.3;
+      min-height: 20px;
+    }
+
+    .hole-stats {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-top: 5px;
+      padding-top: 5px;
+      border-top: 1px solid rgba(0,103,71,0.18);
+    }
+
+    .hole-par {
+      font-size: 9px;
+      font-weight: 700;
+      color: var(--text);
+    }
+
+    .hole-par .par-num {
+      font-size: 13px;
+      color: var(--green);
+      font-weight: 900;
+      font-family: 'Roboto Mono', monospace;
+    }
+
+    .hole-yds {
+      font-family: 'Roboto Mono', monospace;
+      font-size: 8px;
+      color: var(--text-muted);
+    }
+
+    /* Hole shape SVG */
+    .hole-shape {
+      flex: 1;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin: 4px 0;
+      opacity: 0.3;
+    }
+
+    .hole-shape svg { width: 100%; height: 30px; }
+
+    /* Player dots */
+    .hole-players {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 3px;
+      margin-top: 4px;
+    }
+
+    .pdot {
+      width: 21px;
+      height: 21px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 6.5px;
+      font-weight: 800;
+      color: white;
+      border: 1.5px solid rgba(255,255,255,0.2);
+      cursor: pointer;
+      transition: transform 0.18s;
+      position: relative;
+      z-index: 1;
+      flex-shrink: 0;
+    }
+
+    .pdot:hover { transform: scale(1.4); z-index: 20; }
+
+    .pdot.rank1  { background: #b8961c; border-color: var(--gold); color: #000; }
+    .pdot.rank5  { background: var(--green); }
+    .pdot.rank10 { background: #1e4e38; }
+    .pdot.rank15 { background: #162a1e; }
+    .pdot.over   { background: #2a1616; border-color: rgba(200,80,80,0.3); }
+
+    /* tooltip */
+    .pdot-tip {
+      display: none;
+      position: absolute;
+      bottom: calc(100% + 7px);
+      left: 50%;
+      transform: translateX(-50%);
+      background: #0a150a;
+      border: 1px solid var(--border-gold);
+      border-radius: 7px;
+      padding: 8px 10px;
+      width: 150px;
+      z-index: 200;
+      pointer-events: none;
+      white-space: nowrap;
+    }
+
+    .pdot:hover .pdot-tip { display: block; }
+
+    .tip-name {
+      font-size: 11px;
+      font-weight: 700;
+      color: var(--text);
+      margin-bottom: 3px;
+    }
+
+    .tip-line {
+      font-family: 'Roboto Mono', monospace;
+      font-size: 10px;
+      display: flex;
+      gap: 8px;
+    }
+
+    .tip-total { font-weight: 700; }
+    .tip-total.under { color: var(--red); }
+    .tip-total.even  { color: var(--text); }
+    .tip-total.over  { color: var(--text-sub); }
+    .tip-today  { color: var(--text-muted); }
+
+    .amen-tag {
+      position: absolute;
+      top: 4px;
+      right: 4px;
+      background: rgba(201,169,110,0.15);
+      border: 1px solid rgba(201,169,110,0.4);
+      border-radius: 3px;
+      font-size: 6.5px;
+      color: var(--gold);
+      padding: 1px 4px;
+      letter-spacing: 0.5px;
+      font-weight: 700;
+      text-transform: uppercase;
+    }
+
+    /* ───── HOLE DETAIL ───── */
+    .hole-detail {
+      background: var(--bg-card);
+      border: 1px solid var(--border-gold);
+      border-radius: 12px;
+      padding: 18px;
+      margin-top: 16px;
+      display: none;
+    }
+
+    .hole-detail.open {
+      display: block;
+      animation: fadeUp 0.28s ease;
+    }
+
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(8px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    .detail-head {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      margin-bottom: 14px;
+      padding-bottom: 12px;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .detail-title {
+      font-family: 'Playfair Display', serif;
+      font-size: 22px;
+      color: var(--gold);
+    }
+
+    .detail-subtitle {
+      font-size: 10px;
+      color: var(--text-muted);
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      margin-top: 2px;
+    }
+
+    .detail-meta {
+      display: flex;
+      gap: 22px;
+    }
+
+    .dm-item { display: flex; flex-direction: column; align-items: center; }
+
+    .dm-val {
+      font-family: 'Roboto Mono', monospace;
+      font-size: 20px;
+      font-weight: 700;
+      color: var(--text);
+      line-height: 1;
+    }
+
+    .dm-lbl {
+      font-size: 8px;
+      color: var(--text-muted);
+      letter-spacing: 2px;
+      text-transform: uppercase;
+    }
+
+    .detail-players {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(175px, 1fr));
+      gap: 9px;
+    }
+
+    .dp-card {
+      background: rgba(0,103,71,0.08);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 11px;
+    }
+
+    .dp-name {
+      font-size: 12px;
+      font-weight: 700;
+      color: var(--text);
+      margin-bottom: 6px;
+    }
+
+    .dp-scores {
+      display: flex;
+      gap: 14px;
+    }
+
+    .dp-score { display: flex; flex-direction: column; align-items: center; }
+
+    .dp-val {
+      font-family: 'Roboto Mono', monospace;
+      font-size: 15px;
+      font-weight: 700;
+      line-height: 1;
+    }
+    .dp-val.under { color: var(--red); }
+    .dp-val.even  { color: var(--text); }
+    .dp-val.over  { color: var(--text-sub); }
+
+    .dp-lbl {
+      font-size: 8px;
+      color: var(--text-muted);
+      letter-spacing: 1.5px;
+      text-transform: uppercase;
+    }
+
+    /* ───── TOAST ───── */
+    .toast-wrap {
+      position: fixed;
+      top: 100px;
+      right: 20px;
+      z-index: 9999;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      pointer-events: none;
+    }
+
+    .toast {
+      background: #0c1a0c;
+      border: 1px solid var(--border-gold);
+      border-radius: 10px;
+      padding: 12px 16px;
+      min-width: 220px;
+      box-shadow: 0 8px 32px rgba(0,0,0,0.6);
+      animation: toastIn 0.3s ease, toastOut 0.3s ease 3.7s forwards;
+    }
+
+    .toast.eagle-toast { border-color: #ffd700; background: #0e1800; }
+    .toast.birdie-toast { border-color: rgba(201,169,110,0.5); }
+    .toast.bogey-toast { border-color: rgba(200,80,80,0.4); }
+
+    @keyframes toastIn {
+      from { opacity:0; transform: translateX(20px); }
+      to   { opacity:1; transform: translateX(0); }
+    }
+
+    @keyframes toastOut {
+      from { opacity:1; }
+      to   { opacity:0; transform: translateX(20px); }
+    }
+
+    .toast-event {
+      font-size: 10px;
+      font-weight: 800;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      margin-bottom: 4px;
+    }
+    .toast-event.eagle { color: #ffd700; }
+    .toast-event.birdie { color: var(--red-light); }
+    .toast-event.bogey { color: var(--text-muted); }
+
+    .toast-player {
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--text);
+    }
+
+    .toast-detail {
+      font-size: 10px;
+      color: var(--text-muted);
+      margin-top: 2px;
+    }
+
+    .toast-total {
+      font-family: 'Roboto Mono', monospace;
+      font-size: 11px;
+      margin-top: 4px;
+    }
+    .toast-total.under { color: var(--red); }
+
+    /* ───── STATUS BAR ───── */
+    .status-bar {
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      height: 32px;
+      background: #030803;
+      border-top: 1px solid rgba(201,169,110,0.2);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 20px;
+      z-index: 300;
+      font-size: 10px;
+      color: var(--text-muted);
+    }
+
+    .status-left { display: flex; align-items: center; gap: 16px; }
+
+    .status-dot {
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background: var(--green);
+      box-shadow: 0 0 6px var(--green);
+      display: inline-block;
+      margin-right: 5px;
+    }
+
+    .legend {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+    }
+
+    .leg-item {
+      display: flex;
+      align-items: center;
+      gap: 5px;
+      font-size: 9px;
+      color: var(--text-muted);
+    }
+
+    .leg-dot {
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+    }
+
+    /* ───── SCORE FLASH ───── */
+    @keyframes rowFlash {
+      0%   { background: rgba(201,169,110,0.2); }
+      100% { background: transparent; }
+    }
+
+    .flash-anim { animation: rowFlash 1.2s ease; }
+
+    /* ───── SCROLLBAR ───── */
+    ::-webkit-scrollbar { width: 3px; }
+    ::-webkit-scrollbar-thumb { background: var(--green); border-radius: 2px; }
+    ::-webkit-scrollbar-track { background: transparent; }
+  </style>
+</head>
+<body>
+
+<!-- ══════════ HEADER ══════════ -->
+<header class="header">
+  <div class="header-inner">
+    <div class="logo-wrap">
+      <div class="logo-mark">
+        <svg viewBox="0 0 32 32" fill="none">
+          <!-- Stylized Augusta flag & flagstick -->
+          <line x1="10" y1="4" x2="10" y2="28" stroke="white" stroke-width="2" stroke-linecap="round"/>
+          <path d="M10 6 L22 10 L10 14 Z" fill="#FFD700"/>
+          <ellipse cx="16" cy="26" rx="8" ry="2.5" fill="rgba(255,255,255,0.15)"/>
+        </svg>
+      </div>
+      <div class="logo-text-wrap">
+        <div class="logo-main">The Masters</div>
+        <div class="logo-sub">Augusta National · 2026</div>
+      </div>
+    </div>
+
+    <div class="header-center">
+      <div class="round-badge">Round 2 · In Progress</div>
+      <div class="round-detail">Augusta National Golf Club · Par 72 · 7,545 Yards</div>
+    </div>
+
+    <div class="header-right">
+      <div class="weather">⛅ 68°F · SE 8 mph</div>
+      <div class="live-badge">
+        <div class="live-dot"></div>
+        <span class="live-label">LIVE</span>
+      </div>
+      <div class="clock-display" id="clock">--:--:--</div>
+    </div>
+  </div>
+</header>
+
+<!-- ══════════ TICKER ══════════ -->
+<div class="ticker">
+  <div class="ticker-track" id="tickerTrack">
+    <div class="ticker-set" id="tickerSet1"></div>
+    <div class="ticker-set" id="tickerSet2"></div>
+  </div>
+</div>
+
+<!-- ══════════ MAIN LAYOUT ══════════ -->
+<div class="layout">
+
+  <!-- LEADERBOARD -->
+  <aside class="lb-panel">
+    <div class="panel-head">
+      <div class="panel-title">Leaderboard</div>
+      <div class="panel-sub">Round 2 · 78 Players Remaining</div>
+    </div>
+    <div class="lb-cols">
+      <span>Pos</span><span>Player</span><span style="text-align:right">Total</span><span style="text-align:right">Today</span><span style="text-align:right">R1</span>
+    </div>
+    <div id="leaderboard"></div>
+  </aside>
+
+  <!-- COURSE -->
+  <main class="course-panel">
+    <div class="course-top">
+      <div class="course-heading">Augusta National · Course Map</div>
+      <div class="course-kpis">
+        <div class="kpi"><div class="kpi-val" id="kpiField">78</div><div class="kpi-lbl">In Field</div></div>
+        <div class="kpi"><div class="kpi-val" id="kpiUnder">—</div><div class="kpi-lbl">Under Par</div></div>
+        <div class="kpi"><div class="kpi-val" id="kpiLead">—</div><div class="kpi-lbl">Low Score</div></div>
+      </div>
+    </div>
+
+    <!-- Front 9 -->
+    <div class="holes-block">
+      <div class="nine-header">Front Nine · Holes 1–9</div>
+      <div class="holes-grid" id="frontNine"></div>
+    </div>
+
+    <!-- Back 9 -->
+    <div class="holes-block">
+      <div class="nine-header">Back Nine · Amen Corner & Beyond · Holes 10–18</div>
+      <div class="holes-grid" id="backNine"></div>
+    </div>
+
+    <!-- Selected hole detail -->
+    <div class="hole-detail" id="holeDetail"></div>
+  </main>
+</div>
+
+<!-- ══════════ TOAST CONTAINER ══════════ -->
+<div class="toast-wrap" id="toastWrap"></div>
+
+<!-- ══════════ STATUS BAR ══════════ -->
+<div class="status-bar">
+  <div class="status-left">
+    <span><span class="status-dot"></span>Data Feed Connected</span>
+    <span id="lastUpdate">Last updated: —</span>
+  </div>
+  <div class="legend">
+    <div class="leg-item"><div class="leg-dot" style="background:#b8961c;border:1px solid var(--gold)"></div>Leader</div>
+    <div class="leg-item"><div class="leg-dot" style="background:var(--green)"></div>Top 5</div>
+    <div class="leg-item"><div class="leg-dot" style="background:#1e4e38"></div>Top 10</div>
+    <div class="leg-item"><div class="leg-dot" style="background:#162a1e"></div>Top 15</div>
+    <div class="leg-item"><div class="leg-dot" style="background:#2a1616;border:1px solid rgba(200,80,80,0.3)"></div>+Over</div>
+    <div class="leg-item" style="margin-left:8px">
+      <span style="color:var(--red);font-family:'Roboto Mono',monospace;font-weight:700;font-size:10px">-N</span>
+      <span style="margin-left:4px">Under Par</span>
+    </div>
+    <div class="leg-item">
+      <span style="color:var(--text-sub);font-family:'Roboto Mono',monospace;font-size:10px">+N</span>
+      <span style="margin-left:4px">Over Par</span>
+    </div>
+  </div>
+</div>
+
+<script>
+// ══════════════════════════════════════════════
+//  CONFIG
+// ══════════════════════════════════════════════
+
+const ESPN_URL = 'https://site.api.espn.com/apis/site/v2/sports/golf/pga/scoreboard?event=401811941';
+const POLL_MS = 10_000;
+
+// ══════════════════════════════════════════════
+//  STATIC COURSE DATA  (Augusta National)
+// ══════════════════════════════════════════════
+
+const HOLES = [
+  { n:1,  name:"Tea Olive",           par:4, yds:445 },
+  { n:2,  name:"Pink Dogwood",        par:5, yds:575 },
+  { n:3,  name:"Flowering Peach",     par:4, yds:350 },
+  { n:4,  name:"Flowering Crab Apple",par:3, yds:240 },
+  { n:5,  name:"Magnolia",            par:4, yds:495 },
+  { n:6,  name:"Juniper",             par:3, yds:180 },
+  { n:7,  name:"Pampas",              par:4, yds:450 },
+  { n:8,  name:"Yellow Jasmine",      par:5, yds:570 },
+  { n:9,  name:"Carolina Cherry",     par:4, yds:460 },
+  { n:10, name:"Camellia",            par:4, yds:495 },
+  { n:11, name:"White Dogwood",       par:4, yds:520, amen:true },
+  { n:12, name:"Golden Bell",         par:3, yds:155, amen:true },
+  { n:13, name:"Azalea",              par:5, yds:510, amen:true },
+  { n:14, name:"Chinese Fir",         par:4, yds:440 },
+  { n:15, name:"Firethorn",           par:5, yds:550 },
+  { n:16, name:"Redbud",              par:3, yds:170 },
+  { n:17, name:"Nandina",             par:4, yds:440 },
+  { n:18, name:"Holly",               par:4, yds:465 },
+];
+
+// Live player state — populated and refreshed by fetchData()
+let PLAYERS = [];
+
+// Ticker events accumulate from real score changes detected between polls
+let tickerEvents = [];
+let selectedHole = null;
+// Previous score snapshot for change detection: { [playerId]: { total, today, thru } }
+let prevSnapshot = {};
+
+// ══════════════════════════════════════════════
+//  DATA NORMALISATION  (ESPN → internal)
+// ══════════════════════════════════════════════
+
+function parseScore(s) {
+  if (!s || s === '' || s === '--' || s === 'E') return s === 'E' ? 0 : 0;
+  const n = parseInt(s, 10);
+  return isNaN(n) ? 0 : n;
+}
+
+function getInitials(name) {
+  return (name || '').split(' ').map(w => w[0] || '').join('').slice(0, 3).toUpperCase();
+}
+
+// ESPN linescores array — find the active round entry (has per-hole breakdown)
+// Each entry has { period, displayValue, linescores: [...per-hole] }
+function activeRound(linescores) {
+  if (!Array.isArray(linescores)) return null;
+  // Walk backwards: the last round with hole data is the active one
+  for (let i = linescores.length - 1; i >= 0; i--) {
+    if (Array.isArray(linescores[i].linescores) && linescores[i].linescores.length > 0) {
+      return linescores[i];
+    }
+  }
+  return linescores[linescores.length - 1] || null;
+}
+
+function normaliseCompetitor(c) {
+  const name    = c.athlete?.fullName || '—';
+  const country = c.athlete?.flag?.alt || '';
+  const total   = parseScore(c.score);           // e.g. "-5", "E", "+2"
+
+  const rounds     = c.linescores || [];
+  const active     = activeRound(rounds);
+  const holeScores = active?.linescores || [];
+  const thru       = holeScores.length;
+  const finished   = thru >= 18;
+  const hole       = finished ? null : (thru > 0 ? thru + 1 : null);
+  const today      = parseScore(active?.displayValue || 'E');
+
+  // R1 gross strokes (sum of hole values for period=1)
+  const r1Round  = rounds.find(r => r.period === 1);
+  const r1Holes  = r1Round?.linescores || [];
+  const r1       = r1Holes.length === 18
+    ? r1Holes.reduce((sum, h) => sum + (h.value || 0), 0)
+    : (r1Round?.displayValue || '—');
+
+  // Current round number = highest period with any data
+  const currentRound = rounds.reduce((max, r) =>
+    (Array.isArray(r.linescores) && r.linescores.length > 0) ? Math.max(max, r.period) : max, 1);
+
+  return {
+    id           : String(c.id),
+    name,
+    init         : getInitials(name),
+    country,
+    total,
+    today,
+    thru,
+    hole,
+    r1           : typeof r1 === 'number' ? Math.round(r1) : r1,
+    pos          : String(c.order || '—'),
+    move         : null,   // ESPN doesn't expose movement direction
+    currentRound,
+  };
+}
+
+function normaliseResponse(raw) {
+  // ESPN shape: { events: [{ competitions: [{ competitors: [...], status: {...} }] }] }
+  const event       = raw.events?.[0];
+  const competition = event?.competitions?.[0];
+  const competitors = competition?.competitors || [];
+  const status      = competition?.status || {};
+
+  // Update round badge
+  const period    = status.period || 1;
+  const inProgress = status.type?.state === 'in';
+  const isOver    = status.type?.state === 'post';
+  const roundNames = ['', 'Round 1', 'Round 2', 'Round 3', 'Round 4 · Final'];
+  const badge = document.querySelector('.round-badge');
+  if (badge) {
+    const label = roundNames[period] || `Round ${period}`;
+    badge.textContent = `${label} · ${isOver ? 'Complete' : inProgress ? 'In Progress' : 'Upcoming'}`;
+  }
+
+  return competitors.map(normaliseCompetitor);
+}
+
+// ══════════════════════════════════════════════
+//  HELPERS
+// ══════════════════════════════════════════════
+
+function fmtScore(n) {
+  if (n === 0) return 'E';
+  return n > 0 ? `+${n}` : `${n}`;
+}
+
+function scoreClass(n) {
+  if (n < 0) return 'under';
+  if (n === 0) return 'even';
+  return 'over';
+}
+
+function playerRankClass(rank) {
+  if (rank === 1) return 'rank1';
+  if (rank <= 5) return 'rank5';
+  if (rank <= 10) return 'rank10';
+  if (rank <= 15) return 'rank15';
+  return 'over';
+}
+
+function getPlayersOnHole(holeNum) {
+  return PLAYERS.filter(p => p.hole === holeNum);
+}
+
+function sortedPlayers() {
+  return [...PLAYERS].sort((a, b) => a.total - b.total);
+}
+
+// ══════════════════════════════════════════════
+//  HOLE SVG SHAPES (simplified course shapes)
+// ══════════════════════════════════════════════
+
+function holeShape(par, n) {
+  // Generate a simple stylized path suggesting the hole's character
+  const shapes = {
+    3: `<svg viewBox="0 0 60 30"><path d="M5 25 Q30 5 55 25" stroke="rgba(0,103,71,0.8)" stroke-width="6" fill="none" stroke-linecap="round"/><circle cx="55" cy="20" r="4" fill="rgba(0,103,71,0.6)"/></svg>`,
+    4: `<svg viewBox="0 0 60 30"><path d="M5 25 Q15 25 25 15 Q40 5 55 20" stroke="rgba(0,103,71,0.8)" stroke-width="5" fill="none" stroke-linecap="round"/><circle cx="55" cy="18" r="4" fill="rgba(0,103,71,0.6)"/></svg>`,
+    5: `<svg viewBox="0 0 60 30"><path d="M5 26 Q15 26 22 18 Q30 10 38 15 Q48 22 55 18" stroke="rgba(0,103,71,0.8)" stroke-width="5" fill="none" stroke-linecap="round"/><circle cx="55" cy="16" r="4" fill="rgba(0,103,71,0.6)"/></svg>`,
+  };
+  return shapes[par] || shapes[4];
+}
+
+// ══════════════════════════════════════════════
+//  RENDER LEADERBOARD
+// ══════════════════════════════════════════════
+
+function renderLeaderboard() {
+  const sorted = sortedPlayers();
+  const el = document.getElementById('leaderboard');
+  let html = '';
+  let cutInserted = false;
+
+  sorted.forEach((p, i) => {
+    const rank = i + 1;
+    const isLeader = rank === 1;
+    const isSelected = selectedHole && p.hole === selectedHole;
+    const isOver = p.total > 0;
+
+    if (!cutInserted && isOver) {
+      html += `<div class="cut-divider">── Projected Cut Line ──</div>`;
+      cutInserted = true;
+    }
+
+    const posClass = isLeader ? 'p1' : '';
+    const rowClass = [isLeader ? 'is-leader' : '', isSelected ? 'is-selected' : ''].filter(Boolean).join(' ');
+    const thruActive = p.hole !== null && p.thru > 0 ? 'active' : '';
+    const thruLabel  = p.hole === null ? 'F' : (p.thru === 0 ? '—' : `T${p.thru}`);
+
+    html += `
+      <div class="lb-row ${rowClass}" id="lb-row-${p.id}" onclick="onPlayerClick('${p.id}')">
+        <div class="lb-pos ${posClass}">${p.pos || rank}</div>
+        <div class="lb-info">
+          <div class="lb-name">${p.name}</div>
+          <div class="lb-meta">
+            <span class="lb-country">${p.country}</span>
+            <span class="lb-thru ${thruActive}">${thruLabel}</span>
+          </div>
+        </div>
+        <div class="lb-total ${scoreClass(p.total)}">${fmtScore(p.total)}</div>
+        <div class="lb-today ${scoreClass(p.today)}">${fmtScore(p.today)}</div>
+        <div class="lb-r1">${p.r1 !== null ? p.r1 : '—'}</div>
+        ${p.move ? `<div class="move-badge ${p.move}">${p.move === 'up' ? '▲' : '▼'}</div>` : ''}
+      </div>`;
+  });
+
+  el.innerHTML = html;
+  updateKPIs(sorted);
+}
+
+// ══════════════════════════════════════════════
+//  RENDER COURSE
+// ══════════════════════════════════════════════
+
+function renderCourse() {
+  const sorted = sortedPlayers();
+  const rankMap = {};
+  sorted.forEach((p, i) => { rankMap[p.id] = i + 1; });
+
+  function renderHoleCard(hole) {
+    const onHole = getPlayersOnHole(hole.n);
+    const isSelected = selectedHole === hole.n;
+    const isAmen = hole.amen;
+    const hasPlayers = onHole.length > 0;
+
+    let classes = 'hole-card';
+    if (isSelected) classes += ' active-card';
+    if (isAmen) classes += ' amen';
+    if (hasPlayers) classes += ' has-players';
+
+    let dotsHtml = onHole.map(p => {
+      const rank = rankMap[p.id];
+      const rc = playerRankClass(rank);
+      const totalClass = scoreClass(p.total);
+      return `
+        <div class="pdot ${rc}" title="${p.name}">
+          ${p.init.substring(0,2)}
+          <div class="pdot-tip">
+            <div class="tip-name">${p.name}</div>
+            <div class="tip-line">
+              <span class="tip-total ${totalClass}">${fmtScore(p.total)}</span>
+              <span class="tip-today">${fmtScore(p.today)} today</span>
+            </div>
+          </div>
+        </div>`;
+    }).join('');
+
+    return `
+      <div class="${classes}" onclick="onHoleClick(${hole.n})">
+        ${isAmen ? '<div class="amen-tag">Amen</div>' : ''}
+        <div class="hole-num">${hole.n}</div>
+        <div class="hole-name">${hole.name}</div>
+        <div class="hole-stats">
+          <div class="hole-par">P<span class="par-num">${hole.par}</span></div>
+          <div class="hole-yds">${hole.yds}y</div>
+        </div>
+        <div class="hole-shape">${holeShape(hole.par, hole.n)}</div>
+        <div class="hole-players">${dotsHtml || '<span style="font-size:9px;color:var(--text-muted)">—</span>'}</div>
+      </div>`;
+  }
+
+  document.getElementById('frontNine').innerHTML = HOLES.slice(0,9).map(renderHoleCard).join('');
+  document.getElementById('backNine').innerHTML  = HOLES.slice(9).map(renderHoleCard).join('');
+}
+
+// ══════════════════════════════════════════════
+//  HOLE DETAIL
+// ══════════════════════════════════════════════
+
+function renderHoleDetail() {
+  const el = document.getElementById('holeDetail');
+  if (!selectedHole) { el.classList.remove('open'); return; }
+
+  const hole = HOLES[selectedHole - 1];
+  const onHole = getPlayersOnHole(selectedHole);
+
+  if (onHole.length === 0) {
+    el.classList.remove('open');
+    return;
+  }
+
+  const sorted = sortedPlayers();
+  const rankMap = {};
+  sorted.forEach((p, i) => { rankMap[p.id] = i + 1; });
+
+  const playersHtml = onHole
+    .sort((a,b) => a.total - b.total)
+    .map(p => `
+      <div class="dp-card">
+        <div class="dp-name">#${rankMap[p.id]} ${p.name}</div>
+        <div class="dp-scores">
+          <div class="dp-score">
+            <div class="dp-val ${scoreClass(p.total)}">${fmtScore(p.total)}</div>
+            <div class="dp-lbl">Total</div>
+          </div>
+          <div class="dp-score">
+            <div class="dp-val ${scoreClass(p.today)}">${fmtScore(p.today)}</div>
+            <div class="dp-lbl">Today</div>
+          </div>
+          <div class="dp-score">
+            <div class="dp-val even">${p.thru}</div>
+            <div class="dp-lbl">Thru</div>
+          </div>
+        </div>
+      </div>`).join('');
+
+  el.innerHTML = `
+    <div class="detail-head">
+      <div>
+        <div class="detail-title">Hole ${hole.n} · ${hole.name}</div>
+        <div class="detail-subtitle">${onHole.length} player${onHole.length > 1 ? 's' : ''} currently on this hole</div>
+      </div>
+      <div class="detail-meta">
+        <div class="dm-item">
+          <div class="dm-val">${hole.par}</div>
+          <div class="dm-lbl">Par</div>
+        </div>
+        <div class="dm-item">
+          <div class="dm-val">${hole.yds}</div>
+          <div class="dm-lbl">Yards</div>
+        </div>
+        <div class="dm-item">
+          <div class="dm-val">${onHole.length}</div>
+          <div class="dm-lbl">Players</div>
+        </div>
+      </div>
+    </div>
+    <div class="detail-players">${playersHtml}</div>`;
+
+  el.classList.add('open');
+  el.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+}
+
+// ══════════════════════════════════════════════
+//  KPI BAR
+// ══════════════════════════════════════════════
+
+function updateKPIs(sorted) {
+  const underCount = PLAYERS.filter(p => p.total < 0).length;
+  const leader = sorted[0];
+  if (!leader) return;
+  document.getElementById('kpiField').textContent = PLAYERS.length;
+  document.getElementById('kpiUnder').textContent = underCount;
+  document.getElementById('kpiLead').textContent  = fmtScore(leader.total);
+}
+
+// ══════════════════════════════════════════════
+//  TICKER  (built from real score changes)
+// ══════════════════════════════════════════════
+
+function renderTicker() {
+  if (tickerEvents.length === 0) return;
+  const items = tickerEvents.slice(-20).map(e => {
+    const sc = e.type === 'eagle' ? 'eagle' : e.type === 'birdie' ? 'birdie' : e.type === 'bogey' ? 'bogey' : '';
+    return `<span class="t-item">
+      <span class="t-name">${e.name}</span>
+      <span class="t-hole">H${e.hole}</span>
+      <span class="t-score ${sc}">${e.type.toUpperCase()}</span>
+      <span class="t-score">${fmtScore(e.total)}</span>
+    </span><span class="t-sep">·</span>`;
+  }).join('');
+  document.getElementById('tickerSet1').innerHTML = items;
+  document.getElementById('tickerSet2').innerHTML = items;
+}
+
+function initTicker() {
+  const placeholder = `<span class="t-item"><span class="t-name">Connecting to live data feed</span></span><span class="t-sep">·</span>`.repeat(6);
+  document.getElementById('tickerSet1').innerHTML = placeholder;
+  document.getElementById('tickerSet2').innerHTML = placeholder;
+}
+
+// ══════════════════════════════════════════════
+//  CHANGE DETECTION  (real score events → toasts + ticker)
+// ══════════════════════════════════════════════
+
+function detectAndAnnounce(newPlayers) {
+  newPlayers.forEach(p => {
+    const prev = prevSnapshot[p.id];
+    if (!prev) return; // first load, no baseline
+
+    const todayDelta = p.today - prev.today;
+    if (todayDelta === 0) return;
+
+    let type;
+    if (todayDelta <= -2) type = 'eagle';
+    else if (todayDelta === -1) type = 'birdie';
+    else if (todayDelta === 1)  type = 'bogey';
+    else if (todayDelta >= 2)   type = 'double';
+    else return;
+
+    const holeNum = p.thru; // just completed this hole
+    const hole    = HOLES[holeNum - 1];
+    const event   = { name: p.name.split(' ').pop(), hole: holeNum, type, total: p.total };
+    tickerEvents.push(event);
+
+    // Flash leaderboard row
+    const row = document.getElementById(`lb-row-${p.id}`);
+    if (row) {
+      row.classList.remove('flash-anim');
+      void row.offsetWidth;
+      row.classList.add('flash-anim');
+      setTimeout(() => row.classList.remove('flash-anim'), 1200);
+    }
+
+    // Toast for notable events
+    if (type !== 'bogey' || Math.random() < 0.4) {
+      showToast(p, type, hole);
+    }
+  });
+
+  // Update snapshot
+  newPlayers.forEach(p => {
+    prevSnapshot[p.id] = { total: p.total, today: p.today, thru: p.thru };
+  });
+}
+
+function showToast(player, type, hole) {
+  const clsMap = { eagle: 'eagle-toast', birdie: 'birdie-toast', bogey: 'bogey-toast', double: 'bogey-toast' };
+  const wrap  = document.getElementById('toastWrap');
+  const toast = document.createElement('div');
+  toast.className = `toast ${clsMap[type] || ''}`;
+  const holeRef = hole ? `Hole ${hole.n} · ${hole.name}` : '';
+  toast.innerHTML = `
+    <div class="toast-event ${type === 'eagle' ? 'eagle' : type === 'birdie' ? 'birdie' : 'bogey'}">${type.toUpperCase()}</div>
+    <div class="toast-player">${player.name}</div>
+    ${holeRef ? `<div class="toast-detail">${holeRef}</div>` : ''}
+    <div class="toast-total ${scoreClass(player.total)}">${fmtScore(player.total)} tournament</div>`;
+  wrap.appendChild(toast);
+  setTimeout(() => toast.remove(), 4500);
+}
+
+// ══════════════════════════════════════════════
+//  LIVE DATA FETCH
+// ══════════════════════════════════════════════
+
+let fetchError = false;
+
+async function fetchData() {
+  try {
+    const res = await fetch(ESPN_URL, { cache: 'no-store' });
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+    const raw = await res.json();
+
+    const newPlayers = normaliseResponse(raw);
+    if (!newPlayers.length) throw new Error('Empty player list');
+
+    detectAndAnnounce(newPlayers);
+    PLAYERS = newPlayers;
+
+    renderLeaderboard();
+    renderCourse();
+    if (selectedHole) renderHoleDetail();
+    renderTicker();
+    updateLastTime();
+    setErrorBanner(null);
+    fetchError = false;
+  } catch (err) {
+    fetchError = true;
+    setErrorBanner(err.message);
+  }
+}
+
+function setErrorBanner(msg) {
+  let banner = document.getElementById('errorBanner');
+  if (!msg) { if (banner) banner.remove(); return; }
+  if (!banner) {
+    banner = document.createElement('div');
+    banner.id = 'errorBanner';
+    banner.style.cssText = `
+      position:fixed; top:90px; left:50%; transform:translateX(-50%);
+      background:#1a0a0a; border:1px solid rgba(220,80,80,0.5);
+      border-radius:8px; padding:10px 18px; z-index:9999;
+      font-size:12px; color:#ff8888; text-align:center;
+      box-shadow:0 4px 20px rgba(0,0,0,0.6);`;
+    document.body.appendChild(banner);
+  }
+  banner.textContent = `⚠ ESPN feed unavailable — ${msg}`;
+}
+
+// ══════════════════════════════════════════════
+//  INTERACTIONS
+// ══════════════════════════════════════════════
+
+function onHoleClick(n) {
+  selectedHole = selectedHole === n ? null : n;
+  renderLeaderboard();
+  renderCourse();
+  renderHoleDetail();
+}
+
+function onPlayerClick(id) {
+  const p = PLAYERS.find(x => x.id === id);
+  if (p && p.hole) onHoleClick(p.hole);
+}
+
+// ══════════════════════════════════════════════
+//  CLOCK + TIMESTAMP
+// ══════════════════════════════════════════════
+
+function updateClock() {
+  const now = new Date();
+  const h = String(now.getHours()).padStart(2,'0');
+  const m = String(now.getMinutes()).padStart(2,'0');
+  const s = String(now.getSeconds()).padStart(2,'0');
+  document.getElementById('clock').textContent = `${h}:${m}:${s}`;
+}
+
+function updateLastTime() {
+  const now = new Date();
+  const h = String(now.getHours()).padStart(2,'0');
+  const m = String(now.getMinutes()).padStart(2,'0');
+  const s = String(now.getSeconds()).padStart(2,'0');
+  document.getElementById('lastUpdate').textContent = `Last updated: ${h}:${m}:${s}`;
+}
+
+// ══════════════════════════════════════════════
+//  INIT
+// ══════════════════════════════════════════════
+
+function init() {
+  initTicker();
+  renderLeaderboard(); // renders empty state
+  renderCourse();
+  updateClock();
+  setInterval(updateClock, 1000);
+  fetchData();                          // first fetch immediately
+  setInterval(fetchData, POLL_MS);      // then every 10 s
+}
+
+document.addEventListener('DOMContentLoaded', init);
+</script>
+</body>
+</html>
